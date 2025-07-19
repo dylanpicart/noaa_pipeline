@@ -1,0 +1,135 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: noaa-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: noaa_db
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - noaa_network
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.airflow
+    container_name: noaa-airflow-webserver
+    depends_on:
+      - postgres
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/noaa_db
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
+    ports:
+      - "8080:8080"
+    networks:
+      - noaa_network
+    command: webserver
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.airflow
+    container_name: noaa-airflow-scheduler
+    depends_on:
+      - postgres
+      - airflow-webserver
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/noaa_db
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
+    networks:
+      - noaa_network
+    command: scheduler
+
+  graphql-api:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.graphql
+    container_name: noaa-graphql-api
+    environment:
+      - NOAA_TOKEN=${NOAA_TOKEN}
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JAVA_HOME=/usr/lib/jvm/zulu11
+      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./graphql:/app/graphql
+      - ./data:/app/data
+    depends_on:
+      - postgres
+    networks:
+      - noaa_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  spark-master:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.spark
+    container_name: noaa-spark-master
+    environment:
+      SPARK_MODE: master
+    ports:
+      - "7077:7077"
+      - "8081:8080"
+    volumes:
+      - ./spark_jobs:/opt/spark_jobs
+      - ./data:/data
+    networks:
+      - noaa_network
+
+  spark-worker:
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile.spark
+    container_name: noaa-spark-worker
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+    depends_on:
+      - spark-master
+    volumes:
+      - ./spark_jobs:/opt/spark_jobs
+      - ./data:/data
+    networks:
+      - noaa_network
+
+  graphql-ui:
+    image: node:20-alpine
+    container_name: graphql-ui
+    working_dir: /app
+    volumes:
+      - ./graphql-ui:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run start"
+    networks:
+      - noaa_network
+
+networks:
+  noaa_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

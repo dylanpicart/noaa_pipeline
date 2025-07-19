@@ -1,0 +1,36 @@
+data/
+*.csv
+*.parquet
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore virtual environment directories
+.venv/
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore configuration files
+*.cfg
+
+# Hadoop and Spark related files
+hadoop/
+
+# Docker files
+.docker/
+
+# Environment files
+.env
+
+# Jupyter Notebook (Temp)
+.ipynb
+
+# Docker 
+.docker/
+.dockerignore

@@ -1,0 +1,46 @@
+type Project {
+  airflow_project: AirflowProject
+}
+
+type AirflowProject {
+  dags: Dags
+  data: Data
+  dockerComposeFile: File @file(name: "docker-compose.yaml")
+  dockerfile: File @file(name: "Dockerfile")
+  venv: VirtualEnvironment
+  requirementsTxt: File @file(name: "requirements.txt")
+  gitignore: File @file(name: ".gitignore")
+  readme: File @file(name: "README.md")
+}
+
+type Dags {
+  noaaEtlDag: File @file(name: "noaa_etl_dag.py")
+  scripts: Scripts
+}
+
+type Scripts {
+  extractNoaaData: File @file(name: "extract_noaa_data.py")
+  transformData: File @file(name: "transform_data.py")
+  uploadToS3: File @file(name: "upload_to_s3.py")
+}
+
+type Data {
+  raw: Directory
+  transformed: Directory
+  postgresBackup: Directory
+}
+
+type Directory {
+  name: String
+  files: [File]
+}
+
+type File {
+  name: String
+  content: String
+}
+
+type VirtualEnvironment {
+  name: String @default(value: "venv")
+  description: String @default(value: "Python virtual environment")
+}
