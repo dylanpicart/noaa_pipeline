@@ -8,7 +8,7 @@ This project establishes a robust, automated pipeline integrating data extractio
 
 ### Hypothesis
 
-We hypothesize that specific weather patterns and sea surface temperatures can predict algae growth rates, allowing us to leverage machine learning, specifically Physics-Informed Neural Networks, to improve ecological forecasting.
+Specific weather patterns and sea surface temperatures can predict algae growth rates, allowing us to leverage machine learning, specifically Physics-Informed Neural Networks, to improve ecological forecasting.
 
 ---
 
