@@ -62,9 +62,11 @@ services:
     container_name: noaa-graphql-api
     environment:
       - NOAA_TOKEN=${NOAA_TOKEN}
-      - DB_HOST=postgres
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
       - JAVA_HOME=/usr/lib/jvm/zulu11
       - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
     ports:
@@ -88,6 +90,7 @@ services:
       context: .
       dockerfile: .docker/Dockerfile.spark
     container_name: noaa-spark-master
+    user: "1001:1001"  # explicit UID:GID to enforce user at container startup
     environment:
       SPARK_MODE: master
     ports:
@@ -104,6 +107,7 @@ services:
       context: .
       dockerfile: .docker/Dockerfile.spark
     container_name: noaa-spark-worker
+    user: "1001:1001"  # explicit UID:GID again
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
