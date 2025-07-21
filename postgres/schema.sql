@@ -1,5 +1,5 @@
 -- PMN Weekly Data
-CREATE TABLE pmn_weekly (
+CREATE TABLE IF NOT EXISTS pmn_weekly (
     week_start DATE PRIMARY KEY,
     avg_pmn_count FLOAT,
     avg_water_temp FLOAT,
@@ -8,19 +8,19 @@ CREATE TABLE pmn_weekly (
 );
 
 -- Climate Weekly Data
-CREATE TABLE climate_weekly (
+CREATE TABLE IF NOT EXISTS climate_weekly (
     week_start DATE PRIMARY KEY,
     avg_temperature_anomaly FLOAT
 );
 
 -- Chlorophyll Weekly Data
-CREATE TABLE chlorophyll_weekly (
+CREATE TABLE IF NOT EXISTS chlorophyll_weekly (
     week_start DATE PRIMARY KEY,
     avg_chlorophyll_a FLOAT
 );
 
 -- Buoy Weekly Data
-CREATE TABLE buoy_weekly (
+CREATE TABLE IF NOT EXISTS buoy_weekly (
     week_start DATE PRIMARY KEY,
     avg_wave_height FLOAT,
     avg_sst FLOAT,

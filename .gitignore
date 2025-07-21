@@ -1,36 +1,61 @@
+# Data files
 data/
 *.csv
 *.parquet
 
-# Ignore Python cache files
+# Python cache files
 __pycache__/
 *.py[cod]
 
-# Ignore Jupyter Notebook checkpoints
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Ignore virtual environment directories
+# Virtual environments
 .venv/
 
-# Ignore logs
+# Logs
 logs/
 *.log
 
-# Ignore configuration files
+# Configuration files
 *.cfg
 
-# Hadoop and Spark related files
+# Hadoop and Spark files
 hadoop/
 
 # Docker files
 .docker/
+.dockerignore
 
 # Environment files
 .env
 
-# Jupyter Notebook (Temp)
+# Temporary Jupyter files
 .ipynb
 
-# Docker 
-.docker/
-.dockerignore
+# IDE and Editor related files
+.vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Airflow specific files
+airflow-logs/
+airflow.cfg
+
+# Python distribution files
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# pytest and coverage reports
+.coverage
+.pytest_cache/
+
+# dbt files (for future use)
+dbt_packages/
+target/

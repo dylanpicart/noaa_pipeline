@@ -2,7 +2,7 @@
 -- Initial schema setup for NOAA pipeline database
 -- Timestamp: YYYY-MM-DD (replace with actual date)
 
-CREATE TABLE pmn_weekly (
+CREATE TABLE IF NOT EXISTS pmn_weekly (
     week_start DATE NOT NULL,
     avg_pmn_count FLOAT NOT NULL,
     avg_water_temp FLOAT NOT NULL,
@@ -11,19 +11,19 @@ CREATE TABLE pmn_weekly (
     PRIMARY KEY (week_start)
 );
 
-CREATE TABLE climate_weekly (
+CREATE TABLE IF NOT EXISTS climate_weekly (
     week_start DATE NOT NULL,
     avg_temperature_anomaly FLOAT NOT NULL,
     PRIMARY KEY (week_start)
 );
 
-CREATE TABLE chlorophyll_weekly (
+CREATE TABLE IF NOT EXISTS chlorophyll_weekly (
     week_start DATE NOT NULL,
     avg_chlorophyll_a FLOAT NOT NULL,
     PRIMARY KEY (week_start)
 );
 
-CREATE TABLE buoy_weekly (
+CREATE TABLE IF NOT EXISTS buoy_weekly (
     week_start DATE NOT NULL,
     avg_wave_height FLOAT NOT NULL,
     avg_sst FLOAT NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE buoy_weekly (
 );
 
 -- Indexes (for performance optimization)
-CREATE INDEX idx_pmn_week ON pmn_weekly (week_start);
-CREATE INDEX idx_climate_week ON climate_weekly (week_start);
-CREATE INDEX idx_chlorophyll_week ON chlorophyll_weekly (week_start);
-CREATE INDEX idx_buoy_week ON buoy_weekly (week_start);
+CREATE INDEX IF NOT EXISTS idx_pmn_week ON pmn_weekly (week_start);
+CREATE INDEX IF NOT EXISTS idx_climate_week ON climate_weekly (week_start);
+CREATE INDEX IF NOT EXISTS idx_chlorophyll_week ON chlorophyll_weekly (week_start);
+CREATE INDEX IF NOT EXISTS idx_buoy_week ON buoy_weekly (week_start);
