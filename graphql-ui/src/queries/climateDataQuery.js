@@ -16,10 +16,9 @@ export const GET_CLIMATE_DATA = gql`
       limit: $limit
     ) {
       date
-      datatype
-      value
-      station
-      attributes
+      latitude
+      longitude
+      temperatureAnomaly
     }
   }
 `;

@@ -11,17 +11,30 @@ const PMNDataComponent = () => {
   if (error) return <p>Error loading PMN Data: {error.message}</p>;
 
   return (
-    <div>
-      {data.getPmnData.map(item => (
-        <div key={item.time}>
-          <p><strong>Time:</strong> {item.time}</p>
-          <p><strong>Altitude:</strong> {item.altitude} m</p>
-          <p><strong>Latitude:</strong> {item.latitude}</p>
-          <p><strong>Longitude:</strong> {item.longitude}</p>
-          <p><strong>Fluorescence:</strong> {item.fluorescence}</p>
-        </div>
-      ))}
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          <th>Count (cells/L)</th>
+          <th>Water Temp (°C)</th>
+          <th>Salinity (PSU)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.getPmnData.map((item, idx) => (
+          <tr key={idx}>
+            <td>{new Date(item.time).toLocaleString()}</td>
+            <td>{item.latitude}</td>
+            <td>{item.longitude}</td>
+            <td>{item.count}</td>
+            <td>{item.waterTemp}</td>
+            <td>{item.salinity}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 };
 

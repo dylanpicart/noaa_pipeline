@@ -9,10 +9,11 @@ logger = logging.getLogger(__name__)
 
 class PMNData(graphene.ObjectType):
     time = graphene.DateTime()
-    altitude = graphene.Float()
     latitude = graphene.Float()
     longitude = graphene.Float()
-    fluorescence = graphene.Float()
+    count = graphene.Float()
+    water_temp = graphene.Float()
+    salinity = graphene.Float()
 
 def resolve_pmn_data(limit=100):
     spark = get_spark_session()
@@ -29,17 +30,19 @@ def resolve_pmn_data(limit=100):
             logger.warning("PMN API returned empty data.")
             raise GraphQLError("PMN API returned no data.")
 
-        schema = ["time", "altitude", "latitude", "longitude", "fluorescence"]
+        schema = ["time", "latitude", "longitude", "count", "water_temp", "salinity"]
         rdd = spark.sparkContext.parallelize(raw_data)
         df = spark.createDataFrame(rdd, schema=schema)
 
         df_clean = (
             df.withColumn("time", to_timestamp("time"))
-              .withColumn("fluorescence", col("fluorescence").cast("float"))
-              .filter(col("latitude").isNotNull() & col("longitude").isNotNull())
+              .withColumn("count", col("count").cast("float"))
+              .withColumn("water_temp", col("water_temp").cast("float"))
+              .withColumn("salinity", col("salinity").cast("float"))
+              .filter(col("count").isNotNull())
         )
 
-        logger.info(f"PMN data row count after cleaning: {df_clean.count()}")
+        logger.info(f"PMN data rows after cleaning: {df_clean.count()}")
 
         write_to_hdfs(df_clean, hdfs_path)
         logger.info(f"PMN data successfully cached to HDFS at {hdfs_path}")

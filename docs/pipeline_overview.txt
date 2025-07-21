@@ -1,0 +1,58 @@
+Overall structure:
+
+NOAA, Buoy, Satellite APIs
+            |
+            v
+Apache Spark (Managed by YARN)
+- Spark extracts data from APIs.
+- Writes raw data to HDFS.
+            |
+            v
+Raw Data in HDFS (distributed storage)
+            |
+            v
+Apache Spark (Managed by YARN)
+- Loads raw data from HDFS.
+- Performs preprocessing, alignment, aggregation.
+- Writes final dataset to HDFS in efficient format (e.g., Parquet).
+            |
+            v
+Aggregated Dataset (Parquet on HDFS)
+            |
+            v
+Apache Spark (YARN-managed job)
+- Reads aggregated Parquet files.
+- Writes structured data into PostgreSQL (final, queryable store).
+            |
+            v
+PostgreSQL Database
+- Structured and accessible aggregated data.
+- Ideal for querying, visualization, analytics, and PINN modeling.
+
+
+Tools within the structure:
+
+NOAA APIs (PMN, Buoy, Satellite)
+             |
+             v
+Airflow DAG orchestrates:
+    ├── Spark (YARN-managed)
+    │    ├─ Fetch data from APIs
+    │    ├─ Write raw data to HDFS
+    │    └─ Process, aggregate, align data, write aggregated Parquet files to HDFS
+    │
+    └── Spark loads final aggregated data from HDFS into PostgreSQL
+             |
+             v
+PostgreSQL Database (clean, structured data)
+             |
+             v
+Airflow triggers dbt
+    ├── dbt transforms and further models the PostgreSQL data
+    └── Performs automated data tests & generates documentation
+             |
+             v
+Final structured data ready for:
+- PINN Modeling
+- Analytics
+- Visualization (e.g., dashboards)

@@ -11,16 +11,30 @@ const BuoyDataComponent = ({ stationId }) => {
   if (error) return <p>Error loading Buoy Data: {error.message}</p>;
 
   return (
-    <div>
-      {data.getBuoyData.map(item => (
-        <div key={item.timestamp}>
-          <p><strong>Time:</strong> {item.timestamp}</p>
-          <p><strong>Wave Height:</strong> {item.waveHeight} m</p>
-          <p><strong>Sea Surface Temp:</strong> {item.sst} °C</p>
-          <p><strong>Station:</strong> {item.station}</p>
-        </div>
-      ))}
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Wave Height (m)</th>
+          <th>SST (°C)</th>
+          <th>Air Temp (°C)</th>
+          <th>Atmospheric Pressure (hPa)</th>
+          <th>Station</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.getBuoyData.map((item, idx) => (
+          <tr key={idx}>
+            <td>{new Date(item.timestamp).toLocaleString()}</td>
+            <td>{item.waveHeight}</td>
+            <td>{item.sst}</td>
+            <td>{item.airTemp}</td>
+            <td>{item.atmosphericPressure}</td>
+            <td>{item.station}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 };
 

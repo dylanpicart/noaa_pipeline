@@ -6,6 +6,8 @@ export const GET_BUOY_DATA = gql`
       timestamp
       waveHeight
       sst
+      airTemp
+      atmosphericPressure
       station
     }
   }
