@@ -90,7 +90,7 @@ services:
       context: .
       dockerfile: .docker/Dockerfile.spark
     container_name: noaa-spark-master
-    user: "1001:1001"  # explicit UID:GID to enforce user at container startup
+    user: "1001:1001"
     environment:
       SPARK_MODE: master
     ports:
@@ -107,7 +107,7 @@ services:
       context: .
       dockerfile: .docker/Dockerfile.spark
     container_name: noaa-spark-worker
-    user: "1001:1001"  # explicit UID:GID again
+    user: "1001:1001"
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
@@ -118,6 +118,62 @@ services:
       - ./data:/data
     networks:
       - noaa_network
+
+  hadoop-namenode:
+    image: apache/hadoop:3
+    container_name: noaa-hadoop-namenode
+    command: ["hdfs", "namenode"]
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - HDFS-SITE_dfs.namenode.name.dir=/hadoop/dfs/name
+    volumes:
+      - ./data/hadoop/namenode:/hadoop/dfs/name
+    networks:
+      - noaa_network
+
+  hadoop-datanode:
+    image: apache/hadoop:3
+    container_name: noaa-hadoop-datanode
+    command: ["hdfs", "datanode"]
+    environment:
+      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - HDFS-SITE_dfs.datanode.data.dir=/hadoop/dfs/data
+    volumes:
+      - ./data/hadoop/datanode:/hadoop/dfs/data
+    depends_on:
+      - hadoop-namenode
+    networks:
+      - noaa_network
+
+  yarn-resourcemanager:
+    image: apache/hadoop:3
+    container_name: noaa-yarn-resourcemanager
+    command: ["yarn", "resourcemanager"]
+    ports:
+      - "8088:8088"
+    environment:
+      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - YARN-SITE_yarn.resourcemanager.hostname=noaa-yarn-resourcemanager
+    depends_on:
+      - hadoop-namenode
+    networks:
+      - noaa_network
+
+  yarn-nodemanager:
+    image: apache/hadoop:3
+    container_name: noaa-yarn-nodemanager
+    command: ["yarn", "nodemanager"]
+    environment:
+      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - YARN-SITE_yarn.resourcemanager.hostname=noaa-yarn-resourcemanager
+    depends_on:
+      - yarn-resourcemanager
+    networks:
+      - noaa_network
+
 
   graphql-ui:
     image: node:20-alpine
