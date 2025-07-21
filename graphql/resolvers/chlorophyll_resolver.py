@@ -13,36 +13,23 @@ class ChlorophyllData(graphene.ObjectType):
     longitude = graphene.Float()
     chlorophyll_a = graphene.Float()
 
-def resolve_chlorophyll_data(start_date, end_date, limit=100):
-    spark = get_spark_session()
+def resolve_chlorophyll_data(root, info, start_date, end_date, limit=100):
+    spark = info.context['spark']  # Persistent Spark session
     hdfs_path = f"/data/chlorophyll/{start_date}_{end_date}.parquet"
 
     try:
-        if hdfs_file_exists(spark, hdfs_path):
-            logger.info(f"Loading Chlorophyll data from HDFS: {hdfs_path}")
-            df = spark.read.parquet(hdfs_path)
-            return df.limit(limit).collect()
+        if not hdfs_file_exists(spark, hdfs_path):
+            logger.warning(f"Preprocessed Chlorophyll data not found at {hdfs_path}")
+            raise GraphQLError("Preprocessed Chlorophyll data not available.")
 
-        raw_data = fetch_chlorophyll_data(start_date, end_date)
-        if not raw_data:
-            logger.warning("Chlorophyll API returned empty data.")
-            raise GraphQLError("Chlorophyll API returned no data.")
+        logger.info(f"Loading Chlorophyll data from HDFS: {hdfs_path}")
+        df = spark.read.parquet(hdfs_path)
+        return df.limit(limit).collect()
 
-        schema = ["time", "latitude", "longitude", "chlorophyll_a"]
-        rdd = spark.sparkContext.parallelize(raw_data)
-        df = spark.createDataFrame(rdd, schema=schema)
-
-        df_clean = (
-            df.withColumn("time", to_timestamp("time"))
-              .withColumn("chlorophyll_a", col("chlorophyll_a").cast("float"))
-              .filter(col("chlorophyll_a").isNotNull())
-        )
-
-        logger.info(f"Chlorophyll data rows after cleaning: {df_clean.count()}")
-
-        write_to_hdfs(df_clean, hdfs_path)
-        return df_clean.limit(limit).collect()
-
+    except GraphQLError as e:
+        logger.error(f"GraphQL error in Chlorophyll resolver: {str(e)}")
+        raise
     except Exception as e:
-        logger.exception(f"Error in Chlorophyll resolver: {str(e)}")
+        logger.exception(f"Unexpected error in Chlorophyll resolver: {str(e)}")
         raise GraphQLError("Internal server error during Chlorophyll data resolution.")
+

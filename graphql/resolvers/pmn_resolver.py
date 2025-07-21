@@ -15,39 +15,18 @@ class PMNData(graphene.ObjectType):
     water_temp = graphene.Float()
     salinity = graphene.Float()
 
-def resolve_pmn_data(limit=100):
-    spark = get_spark_session()
-    hdfs_path = "/data/pmn_data.parquet"
+def resolve_pmn_data(root, info, limit=100):
+    spark = info.context['spark']  # Persistent Spark session
+    hdfs_path = "/data/pmn/weekly_aggregated.parquet"
 
     try:
-        if hdfs_file_exists(spark, hdfs_path):
-            logger.info(f"Loading PMN data from HDFS: {hdfs_path}")
-            df = spark.read.parquet(hdfs_path)
-            return df.limit(limit).collect()
+        if not hdfs_file_exists(spark, hdfs_path):
+            logger.warning(f"Preprocessed PMN data not found at {hdfs_path}")
+            raise GraphQLError("Preprocessed PMN data not available.")
 
-        raw_data = fetch_pmn_data()
-        if not raw_data:
-            logger.warning("PMN API returned empty data.")
-            raise GraphQLError("PMN API returned no data.")
-
-        schema = ["time", "latitude", "longitude", "count", "water_temp", "salinity"]
-        rdd = spark.sparkContext.parallelize(raw_data)
-        df = spark.createDataFrame(rdd, schema=schema)
-
-        df_clean = (
-            df.withColumn("time", to_timestamp("time"))
-              .withColumn("count", col("count").cast("float"))
-              .withColumn("water_temp", col("water_temp").cast("float"))
-              .withColumn("salinity", col("salinity").cast("float"))
-              .filter(col("count").isNotNull())
-        )
-
-        logger.info(f"PMN data rows after cleaning: {df_clean.count()}")
-
-        write_to_hdfs(df_clean, hdfs_path)
-        logger.info(f"PMN data successfully cached to HDFS at {hdfs_path}")
-
-        return df_clean.limit(limit).collect()
+        logger.info(f"Loading PMN data from HDFS: {hdfs_path}")
+        df = spark.read.parquet(hdfs_path)
+        return df.limit(limit).collect()
 
     except GraphQLError as e:
         logger.error(f"GraphQL error in PMN resolver: {str(e)}")
@@ -55,3 +34,4 @@ def resolve_pmn_data(limit=100):
     except Exception as e:
         logger.exception(f"Unexpected error in PMN resolver: {str(e)}")
         raise GraphQLError("Internal server error during PMN data resolution.")
+

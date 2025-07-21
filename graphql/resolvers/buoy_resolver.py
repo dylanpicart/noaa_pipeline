@@ -15,46 +15,18 @@ class BuoyData(graphene.ObjectType):
     atmospheric_pressure = graphene.Float()
     station = graphene.String()
 
-def resolve_buoy_data(station_id, limit=100):
-    spark = get_spark_session()
+def resolve_buoy_data(root, info, station_id, limit=100):
+    spark = info.context['spark']  # Persistent Spark session
     hdfs_path = f"/data/buoy/{station_id}.parquet"
 
     try:
-        if hdfs_file_exists(spark, hdfs_path):
-            logger.info(f"Loading buoy data from HDFS: {hdfs_path}")
-            df = spark.read.parquet(hdfs_path)
-            return df.limit(limit).collect()
+        if not hdfs_file_exists(spark, hdfs_path):
+            logger.warning(f"Preprocessed Buoy data not found at {hdfs_path}")
+            raise GraphQLError("Preprocessed Buoy data not available.")
 
-        raw_data = fetch_buoy_data(station_id)
-        rdd = spark.sparkContext.parallelize([line.split() for line in raw_data])
-
-        schema = [
-            "year", "month", "day", "hour", "minute",
-            "wave_height", "sst", "air_temp", "atmospheric_pressure", "station"
-        ]
-        df = spark.createDataFrame(rdd, schema=schema)
-
-        df_clean = (
-            df.withColumn(
-                "timestamp",
-                to_timestamp(concat_ws(" ", "year", "month", "day", "hour", "minute"), "yyyy MM dd HH mm")
-            )
-            .withColumn("wave_height", col("wave_height").cast("float"))
-            .withColumn("sst", col("sst").cast("float"))
-            .withColumn("air_temp", col("air_temp").cast("float"))
-            .withColumn("atmospheric_pressure", col("atmospheric_pressure").cast("float"))
-            .filter(
-                col("timestamp").isNotNull() &
-                col("wave_height").isNotNull()
-            )
-        )
-
-        logger.info(f"Buoy data rows after cleaning: {df_clean.count()}")
-
-        write_to_hdfs(df_clean, hdfs_path)
-        logger.info(f"Buoy data successfully cached to HDFS at {hdfs_path}")
-
-        return df_clean.limit(limit).collect()
+        logger.info(f"Loading buoy data from HDFS: {hdfs_path}")
+        df = spark.read.parquet(hdfs_path)
+        return df.limit(limit).collect()
 
     except GraphQLError as e:
         logger.error(f"GraphQL error in buoy resolver: {str(e)}")
@@ -62,4 +34,5 @@ def resolve_buoy_data(station_id, limit=100):
     except Exception as e:
         logger.exception(f"Unexpected error in buoy resolver: {str(e)}")
         raise GraphQLError("Internal server error during buoy data resolution.")
+
 
