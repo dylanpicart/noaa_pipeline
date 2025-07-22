@@ -120,27 +120,23 @@ services:
       - noaa_network
 
   hadoop-namenode:
-    image: apache/hadoop:3
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: noaa-hadoop-namenode
-    command: ["hdfs", "namenode"]
     ports:
       - "9870:9870"
       - "9000:9000"
     environment:
-      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
-      - HDFS-SITE_dfs.namenode.name.dir=/hadoop/dfs/name
+      - CLUSTER_NAME=noaa
     volumes:
       - ./data/hadoop/namenode:/hadoop/dfs/name
     networks:
       - noaa_network
 
   hadoop-datanode:
-    image: apache/hadoop:3
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: noaa-hadoop-datanode
-    command: ["hdfs", "datanode"]
     environment:
-      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
-      - HDFS-SITE_dfs.datanode.data.dir=/hadoop/dfs/data
+      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:9000
     volumes:
       - ./data/hadoop/datanode:/hadoop/dfs/data
     depends_on:
@@ -149,30 +145,28 @@ services:
       - noaa_network
 
   yarn-resourcemanager:
-    image: apache/hadoop:3
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
     container_name: noaa-yarn-resourcemanager
-    command: ["yarn", "resourcemanager"]
     ports:
       - "8088:8088"
     environment:
-      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
-      - YARN-SITE_yarn.resourcemanager.hostname=noaa-yarn-resourcemanager
+      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:9000
     depends_on:
       - hadoop-namenode
     networks:
       - noaa_network
 
   yarn-nodemanager:
-    image: apache/hadoop:3
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: noaa-yarn-nodemanager
-    command: ["yarn", "nodemanager"]
     environment:
-      - CORE-SITE_fs.defaultFS=hdfs://noaa-hadoop-namenode:9000
-      - YARN-SITE_yarn.resourcemanager.hostname=noaa-yarn-resourcemanager
+      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - YARN_CONF_yarn_resourcemanager_hostname=noaa-yarn-resourcemanager
     depends_on:
       - yarn-resourcemanager
     networks:
       - noaa_network
+
 
 
   graphql-ui:
