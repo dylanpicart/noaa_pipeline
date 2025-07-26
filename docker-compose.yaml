@@ -136,7 +136,7 @@ services:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: noaa-hadoop-datanode
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:8020
     volumes:
       - ./data/hadoop/datanode:/hadoop/dfs/data
     depends_on:
@@ -150,7 +150,7 @@ services:
     ports:
       - "8088:8088"
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:8020
     depends_on:
       - hadoop-namenode
     networks:
@@ -160,7 +160,7 @@ services:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: noaa-yarn-nodemanager
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:9000
+      - CORE_CONF_fs_defaultFS=hdfs://noaa-hadoop-namenode:8020
       - YARN_CONF_yarn_resourcemanager_hostname=noaa-yarn-resourcemanager
     depends_on:
       - yarn-resourcemanager
@@ -183,6 +183,7 @@ services:
 
 networks:
   noaa_network:
+    name: noaa_network # Disables prefixing of network name
     driver: bridge
 
 volumes:
