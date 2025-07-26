@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: noaa_db
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - ./data/postgres_data:/var/lib/postgresql/data
     ports:
@@ -25,7 +25,8 @@ services:
       - LOAD_EX=n
       - EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/noaa_db
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data:/opt/airflow/data
@@ -47,7 +48,7 @@ services:
       - LOAD_EX=n
       - EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/noaa_db
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data:/opt/airflow/data
