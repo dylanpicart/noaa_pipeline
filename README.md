@@ -1,6 +1,6 @@
 # NOAA Data Pipeline to PINN Analysis Dashboard
 
-A comprehensive Data Engineering pipeline designed to automate the extraction, transformation, and loading (ETL) of NOAA data for analysis of environmental patterns, specifically phytoplankton (PMN) growth influenced by weather patterns, sea surface temperatures, and chlorophyll-a concentration.
+A comprehensive Data Engineering pipeline designed to automate the extraction, loading, and transformation (ELT) of NOAA data for analysis of environmental patterns, specifically phytoplankton (PMN) growth influenced by weather patterns, sea surface temperatures, and chlorophyll-a concentration.
 
 ## Project Overview
 
@@ -31,7 +31,7 @@ Specific weather patterns, sea surface temperatures, and chlorophyll-a concentra
 
 ### 4. Workflow Automation
 
-* **Apache Airflow**: Orchestrates the ETL pipeline, managing scheduling, dependencies, and error handling to ensure reliability and efficiency.
+* **Apache Airflow**: Orchestrates the ELT pipeline, managing scheduling, dependencies, and error handling to ensure reliability and efficiency.
 * **Docker & Docker Compose**: Containerizes services ensuring consistent development and deployment environments.
 
 ---
@@ -47,7 +47,7 @@ Specific weather patterns, sea surface temperatures, and chlorophyll-a concentra
 │   └── 📄 Dockerfile.spark
 │
 ├── 📂 dags/
-│   ├── 📄 noaa_etl_dag.py
+│   ├── 📄 noaa_ELT_dag.py
 │   ├── 📄 __init__.py
 │   └── 📂 scripts/
 │       ├── 📄 extract_noaa_data.py
@@ -101,6 +101,53 @@ Specific weather patterns, sea surface temperatures, and chlorophyll-a concentra
 ├── 📄 .gitignore
 └── 📄 README.md
 ```
+---
+
+## **Stack Overview: End-to-End Data Engineering Environment**
+
+With the successful setup and orchestration of **PostgreSQL**, **Hadoop (HDFS/YARN)**, **Apache Spark**, and **Apache Airflow**, you now have a complete, production-grade local data engineering pipeline. Here’s what this enables:
+
+### **What’s Running**
+
+* **PostgreSQL:**
+  Relational database for structured storage, fast queries, and the Airflow metadata backend.
+* **Hadoop HDFS:**
+  Distributed file storage, designed for big data scale and fault tolerance.
+* **YARN:**
+  Resource manager that schedules and coordinates distributed jobs (including Spark).
+* **Apache Spark:**
+  High-performance in-memory compute framework for scalable ELT, analytics, and ML.
+* **Apache Airflow:**
+  Orchestrator for all ELT, analytics, and ML workflows—manages dependencies, scheduling, and pipeline reliability.
+
+### **What This Enables**
+
+* **Production-like development environment:**
+  Simulate a real-world, scalable data platform—ideal for robust development, testing, and onboarding.
+* **Automated, reliable ELT:**
+  Airflow triggers Spark jobs, data moves in/out of HDFS, results land in PostgreSQL, and everything is containerized for repeatability.
+* **Data science and analytics ready:**
+  Quickly prototype, test, and deploy Spark analytics or ML jobs, even against large or distributed data.
+* **Extensible and collaborative:**
+  Add new nodes (DataNodes, Spark Workers) or services with minimal config changes. Perfect for scaling or team collaboration.
+* **Cloud-ready:**
+  The local stack mimics cloud platforms—easy to migrate or deploy to Azure or another cloud.
+
+### **Typical Workflow Example**
+
+1. **Airflow triggers extraction scripts** (Python/Bash) to pull fresh NOAA data.
+2. **Raw data lands in HDFS**, tracked in Airflow.
+3. **Spark jobs transform and aggregate** the raw data in HDFS (cleaning, weekly aggregation, feature engineering).
+4. **Transformed data is loaded to PostgreSQL** for downstream analysis and dashboarding.
+5. **All orchestration, scheduling, and monitoring handled by Airflow** with full auditability and retry logic.
+
+---
+
+## **Why This Matters**
+
+* **You can test, debug, and iterate on real data engineering and ML pipelines before deploying to production.**
+* **You are ready for advanced orchestration, distributed analytics, and future ML integration** (like PINNs), with minimal local-to-cloud friction.
+* **You can collaborate, extend, and automate your workflows with confidence.**
 
 ---
 
@@ -140,3 +187,7 @@ This project is under active development. Contributions, suggestions, and collab
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Under development by **Dylan Picart**.

@@ -4,6 +4,7 @@ async-timeout==4.0.3
 aiofiles==23.2.1
 
 apache-airflow==2.9.2
+apache-airflow-providers-apache-spark==4.1.1
 apache-airflow-providers-http==4.5.1
 apache-airflow-providers-common-sql==1.8.0
 apache-airflow-providers-common-io==1.4.0

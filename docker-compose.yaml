@@ -69,7 +69,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_PORT=${DB_PORT}
       - JAVA_HOME=/usr/lib/jvm/zulu11
-      - HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+      - HADOOP_CONF_DIR=/opt/hadoop-3.2.1/etc/hadoop
     ports:
       - "5000:5000"
     volumes:
@@ -83,7 +83,7 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 10s
 
   spark-master:
